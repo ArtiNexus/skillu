@@ -1,63 +1,67 @@
 # SkillU — Universal Agent Arsenal
 
-> 一个跨 Agent 通用的「Skill + CLI/SDK」工具武库。
-> 无论你用的是 pi、Hermes、Claude Code 还是 OpenCode，
-> 一行 `git clone` 就能获得 28+ 个经过验证的本地免费工具能力。
+> 跨 Agent 通用的「Skill + CLI/SDK」工具武库。
+> 28 个本地免费工具，全部端到端测试通过。
+> `git clone` 即用，支持一键批量安装或单个安装。
 
-## 🚀 快速开始
+## 🚀 批量安装（推荐）
 
 ```bash
-git clone https://github.com/wybh03/skillu.git ~/skillu
+git clone https://github.com/ArtiNexus/skillu.git ~/skillu
 cd ~/skillu
 chmod +x install.sh
-./install.sh          # 自动安装所有可自动装的工具
+./install.sh
 ```
 
-Agent 启动时，加载 `INDEX.md` 获得全工具检索表。需要某个工具时，让 Agent 读取 `tools/工具名.md` 获取调用规范。
+## 🎯 单个安装
 
-## 📊 工具覆盖
+```bash
+# ── Homebrew (8个) ──
+brew install typst pandoc graphviz ffmpeg d2 silicon gitleaks nuclei
 
-| 领域 | 工具数 | 说明 |
-|:-----|:-----:|:-----|
-| 📄 办公文档 | 4 | Typst, WeasyPrint, Pandoc, python-docx |
-| 🎨 画图图表 | 6 | D2, Excalidraw, Graphviz, Vega-Lite, Markmap, Mermaid |
-| ✨ 视觉创意 | 5 | Silicon, Carbon, Satori, Three.js, Remotion |
-| 🔧 编程工程 | 6 | Prettier, Biome, Playwright, Trufflehog, Nuclei, Mage-AI |
-| 🎬 音视频 | 5 | FFmpeg, Whisper, Edge-TTS, Spleeter, ComfyUI |
-| 📖 知识长文 | 3 | Neo4j, LlamaIndex, Fountain |
-| 🌐 搜索Agent | 5 | Jina Reader, Firecrawl, LiteLLM, OpenCode, Claude Code |
+# ── npm 全局 (4个) ──
+npm install -g markmap-cli prettier @mermaid-js/mermaid-cli afterwriting
+
+# ── Biome (二进制) ──
+curl -L https://github.com/biomejs/biome/releases/latest/download/biome-darwin-x64 -o /usr/local/bin/biome
+chmod +x /usr/local/bin/biome
+
+# ── pip3.12 (9个) ──
+pip3.12 install weasyprint python-docx edge-tts spleeter openai-whisper playwright litellm llama-index manim --break-system-packages
+
+# ── 项目级 (6个，在项目目录内按需) ──
+npm install satori remotion @remotion/cli three puppeteer carbon-now-cli vega-lite
+
+# ── 无需安装 ──
+# Excalidraw → Agent直接输出JSON
+# Jina Reader → 在线 curl https://r.jina.ai/URL
+```
+
+## 📊 工具覆盖 (28/28 ✅)
+
+| 领域 | 工具 |
+|:-----|:-----|
+| 📄 办公 | Typst, WeasyPrint, Pandoc, python-docx |
+| 🎨 画图 | D2, Excalidraw, Graphviz, Mermaid, Markmap, Vega-Lite |
+| ✨ 视觉 | Silicon, Carbon, Satori, Three.js, Remotion, Manim |
+| 🔧 工程 | Prettier, Biome, Playwright, Gitleaks, Nuclei |
+| 🎬 音视频 | FFmpeg, Whisper, Edge-TTS, Spleeter |
+| 📖 知识 | Fountain |
+| 🤖 AI管道 | LiteLLM, LlamaIndex |
+| 🌐 搜索 | Jina Reader |
 
 ## 📁 仓库结构
 
 ```
 skillu/
-├── README.md           # 你正在读的这个
-├── INDEX.md            # Agent 检索主表（机器可读）
-├── install.sh          # 一键安装脚本
-├── test-report.md      # 安装与功能测试报告
-└── tools/
-    ├── typst.md        # 每个工具一个规范文件
-    ├── d2-lang.md
-    ├── graphviz.md
-    └── ...
+├── README.md            # 你正在读的这个
+├── INDEX.md             # Agent 检索主表
+├── install.sh           # 一键/单个安装脚本
+├── skillu-tools.xlsx    # Excel 工具清单（可点击链接）
+├── test-report.md       # 完整测试报告
+└── tools/               # 每个工具的Skill调用规范 (28个)
 ```
 
-## 🟢/🔴 收费状态
+## 🤖 Agent 使用方式
 
-- **🟢 完全免费/开源: 28 个**（本地运行，零成本）
-- **🟡 免费额度/需账号: 3 个**（Figma API, MusicMake, Jina Reader）
-- **🔴 商业付费: 5 个**（Kling AI, AnyCap, ACE Studio, Claude Code Token）
-
-> 详见 `test-report.md`
-
-## 🤖 怎么让 Agent 使用
-
-告诉你的 Agent：
-
-> "加载 `~/skillu/INDEX.md` 了解可用工具清单，
->  需要画图时读取 `~/skillu/tools/d2-lang.md` 获取调用规范，
->  按规范输出代码，本地 CLI 自动渲染。"
-
-## 📝 许可
-
-MIT — 工具各自保留原有许可。本仓库仅提供检索规范和安装指引。
+启动时加载 `~/skillu/INDEX.md`，需要某工具时读取 `~/skillu/tools/工具名.md`。

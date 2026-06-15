@@ -1,78 +1,94 @@
 #!/bin/bash
-# SkillU — 一键安装脚本
-# 自动探测系统环境，批量安装所有可自动装的免费工具
+# SkillU — 一键安装脚本 (28个免费工具)
 set -e
 
-RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
-pass() { echo -e "${GREEN}✅${NC} $1"; }
-warn() { echo -e "${YELLOW}⚠️${NC} $1"; }
-fail() { echo -e "${RED}❌${NC} $1"; }
+G='\033[0;32m'; Y='\033[1;33m'; R='\033[0;31m'; N='\033[0m'
+ok() { echo -e "${G}✅${N} $1"; }
+wn() { echo -e "${Y}⚠️${N} $1"; }
+er() { echo -e "${R}❌${N} $1"; }
 
-echo "🛠  SkillU Installer — $(date '+%Y-%m-%d %H:%M')"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🛠  SkillU Installer"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# ── Step 0: 环境探测 ──
-OS=$(uname -s)
-echo "📌 OS: $OS"
-HAS_BREW=false; HAS_NPM=false; HAS_PIP=false; HAS_DOCKER=false
+# ── 环境 ──
+OS=$(uname -s); echo "📌 $OS"
+HAS_BREW=false; HAS_NPM=false; HAS_PIP=false
 command -v brew &>/dev/null && HAS_BREW=true
 command -v npm  &>/dev/null && HAS_NPM=true
-command -v pip3 &>/dev/null && HAS_PIP=true
-command -v docker &>/dev/null && HAS_DOCKER=true
+command -v python3.12 &>/dev/null && HAS_PIP=true
 
-# ── Step 1: Homebrew 工具 ──
+# ═════════════════════════════════════
+# Homebrew (8个)
+# ═════════════════════════════════════
+BREWS="typst pandoc graphviz ffmpeg d2 silicon gitleaks nuclei"
 if $HAS_BREW; then
-  echo ""; echo "── 📦 Homebrew 工具 ──"
-  BREW_PKGS="typst pandoc graphviz ffmpeg d2 silicon trufflehog nuclei"
-  for pkg in $BREW_PKGS; do
-    if brew list $pkg &>/dev/null; then pass "$pkg (已安装)"; else
-      echo "  安装 $pkg..."
-      brew install $pkg &>/dev/null && pass "$pkg" || fail "$pkg"
-    fi
+  echo ""; echo "── 📦 Homebrew ──"
+  for p in $BREWS; do
+    brew list $p &>/dev/null && ok "$p" || { echo "  安装 $p..."; brew install $p &>/dev/null && ok "$p" || er "$p"; }
   done
 else
-  warn "brew 未安装，跳过 Homebrew 工具。请先安装: https://brew.sh"
+  wn "无 brew → 跳过: $BREWS"
 fi
 
-# ── Step 2: npm 全局工具 ──
+# ═════════════════════════════════════
+# npm 全局 (4个)
+# ═════════════════════════════════════
+NPMS="markmap-cli prettier @mermaid-js/mermaid-cli afterwriting"
 if $HAS_NPM; then
-  echo ""; echo "── 📦 npm 全局工具 ──"
-  NPM_PKGS="markmap-cli prettier carbon-now-cli afterwriting @anthropic-ai/claude-code"
-  for pkg in $NPM_PKGS; do
-    name=$(echo $pkg | sed 's/@//' | cut -d@ -f1)
-    if npm ls -g --depth=0 2>/dev/null | grep -q "$name"; then pass "$pkg (已安装)"; else
-      echo "  安装 $pkg..."
-      npm install -g "$pkg" &>/dev/null && pass "$pkg" || fail "$pkg"
-    fi
+  echo ""; echo "── 📦 npm 全局 ──"
+  for p in $NPMS; do
+    n=$(echo $p | sed 's/@//' | cut -d@ -f1 | tr -d '/')
+    npm ls -g --depth=0 2>/dev/null | grep -q "$n" && ok "$p" || { echo "  安装 $p..."; npm i -g "$p" &>/dev/null && ok "$p" || er "$p"; }
   done
 else
-  warn "npm 未安装，跳过 Node 工具"
+  wn "无 npm → 跳过: $NPMS"
 fi
 
-# ── Step 3: pip3 Python 工具 ──
+# ═════════════════════════════════════
+# Biome 二进制 (1个)
+# ═════════════════════════════════════
+echo ""; echo "── 📦 Biome(binary) ──"
+if command -v biome &>/dev/null; then ok "biome"
+else
+  URL="https://github.com/biomejs/biome/releases/latest/download/biome-darwin-x64"
+  curl -sL "$URL" -o /usr/local/bin/biome 2>/dev/null && chmod +x /usr/local/bin/biome && ok "biome" || er "biome"
+fi
+
+# ═════════════════════════════════════
+# pip3.12 (9个)
+# ═════════════════════════════════════
+PIPS="weasyprint python-docx edge-tts spleeter openai-whisper playwright litellm llama-index manim"
 if $HAS_PIP; then
-  echo ""; echo "── 📦 pip3 Python 工具 ──"
-  PIP_PKGS="weasyprint python-docx edge-tts spleeter openai-whisper playwright"
-  for pkg in $PIP_PKGS; do
-    if pip3 show "$pkg" &>/dev/null; then pass "$pkg (已安装)"; else
-      echo "  安装 $pkg..."
-      pip3 install "$pkg" &>/dev/null && pass "$pkg" || fail "$pkg"
-    fi
+  echo ""; echo "── 📦 pip3.12 ──"
+  for p in $PIPS; do
+    pip3.12 show "$p" &>/dev/null && ok "$p" || { echo "  安装 $p..."; pip3.12 install "$p" --break-system-packages &>/dev/null && ok "$p" || er "$p"; }
   done
 else
-  warn "pip3 未安装，跳过 Python 工具"
+  wn "无 python3.12 → 跳过: $PIPS (先: brew install python@3.12)"
 fi
 
-# ── Step 4: Docker 提醒 ──
+# ═════════════════════════════════════
+# 提示 (无需安装 + 项目级)
+# ═════════════════════════════════════
 echo ""
-if $HAS_DOCKER; then
-  echo "💡 Docker 可用，可手动安装: neo4j, n8n, dify, mage-ai, comfyui"
-else
-  warn "Docker 未安装。以下工具需 Docker: neo4j, n8n, dify, mage-ai, comfyui"
-fi
+echo "── 💡 无需安装 ──"
+echo "   Excalidraw → Agent直接输出JSON"
+echo "   Jina Reader → 在线API: curl https://r.jina.ai/URL"
+echo ""
+echo "── 💡 项目级(按需npm install) ──"
+echo "   satori remotion @remotion/cli three puppeteer carbon-now-cli vega-lite"
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🎉 完成！单个安装见下方说明。"
+echo ""
 
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🎉 SkillU 安装完成！"
-echo "   查看工具: cat ~/skillu/INDEX.md"
-echo "   测试报告: cat ~/skillu/test-report.md"
+# ═════════════════════════════════════
+# 单个安装指引
+# ═════════════════════════════════════
+if [ "${1}" = "--guide" ]; then
+  echo "══════ 单个安装命令 ══════"
+  echo "brew install typst pandoc graphviz ffmpeg d2 silicon gitleaks nuclei"
+  echo "npm i -g markmap-cli prettier @mermaid-js/mermaid-cli afterwriting"
+  echo "curl -L https://...biome-darwin-x64 -o /usr/local/bin/biome && chmod +x ..."
+  echo "pip3.12 install weasyprint python-docx edge-tts spleeter openai-whisper playwright litellm llama-index manim --break-system-packages"
+fi
